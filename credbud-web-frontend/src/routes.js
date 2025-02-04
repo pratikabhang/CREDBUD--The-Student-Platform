@@ -1,5 +1,4 @@
 import React from "react";
-
 import { Icon } from "@chakra-ui/react";
 import {
   MdBarChart,
@@ -13,14 +12,14 @@ import {
 // Admin Imports
 import MainDashboard from "views/admin/default";
 import ModDashboard from "views/moderator/default";
-import studentManager from "views/moderator/students";
+import StudentManager from "views/moderator/students";
 import NFTMarketplace from "views/admin/marketplace";
-import attendance from "views/moderator/attendance";
+import Attendance from "views/moderator/attendance";
 import Profile from "views/admin/profile";
 import SearchedProfile from "views/admin/studentProfile";
-import subjects from "views/admin/subjects/";
+import Subjects from "views/admin/subjects";
 import SearchedModProfile from "views/moderator/studentProfile";
-import posts from "views/moderator/posts";
+import Posts from "views/moderator/posts";
 import DataTables from "views/admin/dataTables";
 // import RTL from "views/admin/rtl";
 
@@ -49,14 +48,14 @@ const routes = [
     layout: "/moderator",
     path: "/student",
     icon: <Icon as={MdBarChart} width='20px' height='20px' color='inherit' />,
-    component: studentManager,
+    component: StudentManager,
   },
   {
     name: "Attendance",
     layout: "/moderator",
     path: "/attendance",
     icon: <Icon as={MdQrCode} width='20px' height='20px' color='inherit' />,
-    component: attendance,
+    component: Attendance,
   },
   {
     name: "Router",
@@ -99,31 +98,30 @@ const routes = [
     layout: "/admin",
     icon: <Icon as={MdBarChart} width='20px' height='20px' color='inherit' />,
     path: "/subjects",
-    component: subjects,
+    component: Subjects,
   },
   {
     name: "Search Result",
     layout: "/admin",
-    path: "/search/result/:userType/:id", // Dynamic path parameter for profile ID
+    path: "/search/result/:userType/:id",
     icon: <Icon as={MdPerson} width='20px' height='20px' color='inherit' />,
     component: SearchedProfile,
-    hidden:true
+    hidden: true,
   },
   {
     name: "Search Result",
     layout: "/moderator",
-    path: "/search/result/:userType/:id", // Dynamic path parameter for profile ID
+    path: "/search/result/:userType/:id",
     icon: <Icon as={MdPerson} width='20px' height='20px' color='inherit' />,
     component: SearchedModProfile,
-    hidden:true
+    hidden: true,
   },
   {
     name: "Posts",
     layout: "/moderator",
-    path: "/posts", // Dynamic path parameter for profile ID
+    path: "/posts",
     icon: <Icon as={MdPerson} width='20px' height='20px' color='inherit' />,
-    component: posts,
-    
+    component: Posts,
   },
   {
     name: "Profile",
