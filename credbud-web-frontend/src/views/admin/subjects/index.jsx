@@ -160,7 +160,7 @@ export default function Marketplace() {
 
           <TabPanels>
             <TabPanel>
-              Please add or upload the new subject according to the academic year and pattern.
+              Please upload the new subject according to the academic year and pattern.
             </TabPanel>
           </TabPanels>
         </Tabs>
