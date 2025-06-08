@@ -63,7 +63,12 @@ import ExcelReader from "components/fileUpload/exelUpload";
 import { searchUser } from "api/apiService";
 import { useHistory } from "react-router-dom/cjs/react-router-dom";
 import Card from "components/card/Card";
-import { MdImportExport, MdOutbond, MdQrCode2 } from "react-icons/md";
+import {
+  MdImportExport,
+  MdOutbond,
+  MdQrCode2,
+  MdOutlineFileDownload,
+} from "react-icons/md";
 import QRCode from "qrcode.react";
 import { getCodes } from "api/apiService";
 
@@ -211,9 +216,15 @@ export default function Marketplace() {
             </Text>
             <Text>
               Expires At:{" "}
-              {new Date(
-                currentCode.expiresIn._seconds * 1000
-              ).toLocaleTimeString()}
+              {new Intl.DateTimeFormat("en-IN", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              }).format(new Date(currentCode.expiresIn._seconds * 1000))}
             </Text>
           </Box>
         )}
@@ -338,6 +349,15 @@ export default function Marketplace() {
               >
                 <button onClick={() => handleModal("QR")}>
                   <Banner icon={<MdQrCode2 size="87px" />} name="Generate QR" />
+                </button>
+                <button onClick={() => handleModal("QR")}>
+                  <Banner icon={<MdImportExport size="87px" />} name="Report" />
+                </button>
+                <button onClick={() => handleModal("QR")}>
+                  <Banner
+                    icon={<MdOutlineFileDownload size="87px" />}
+                    name="Attendnace Analysis"
+                  />
                 </button>
                 <button onClick={() => handleModal("QR")}>
                   <Banner

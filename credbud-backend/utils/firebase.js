@@ -1,11 +1,14 @@
-const firebase = require("firebase-admin");
-const firebaseAuth = require("firebase-admin/auth");
+// utils/firebase.js
 
+const firebase = require("firebase-admin");
+const crypto = require('crypto');
+
+// Initialize Firebase Admin SDK
 const authData = {
   "type": process.env.type,
   "project_id": process.env.project_id,
   "private_key_id": process.env.private_key_id,
-  "private_key": process.env.private_key,
+  "private_key": process.env.private_key?.replace(/\\n/g, '\n'), // important fix
   "client_email": process.env.client_email,
   "client_id": process.env.client_id,
   "auth_uri": process.env.auth_uri,
@@ -13,46 +16,46 @@ const authData = {
   "auth_provider_x509_cert_url": process.env.auth_provider_x509_cert_url,
   "client_x509_cert_url": process.env.client_x509_cert_url,
   "universe_domain": process.env.universe_domain
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    credential: firebase.credential.cert(authData),
+  });
 }
 
-const crypto = require('crypto');
-const { error } = require("console");
-const { post } = require("../routes/userRoutes");
-firebase.initializeApp({
-  credential: firebase.credential.cert(authData)
-});
-const getAuth = firebaseAuth.getAuth();
-// console.log(defaultAuth)
-var auth = firebase.auth();
-const cryptographicKey = 'credbud@2022';
-const db = firebase.firestore()
-firebase.firestore().settings({ ignoreUndefinedProperties: true });
+const db = firebase.firestore();
+const auth = firebase.auth();
 
+// AES-256 Encryption / Decryption Utility
+const ivLength = 16; // For AES, IV is 16 bytes
+const cryptographicKey = 'credbud@2022';
+const key = crypto.scryptSync(cryptographicKey, 'salt', 32); // 256-bit key
 
 const encodeBase64WithKey = (data) => {
-  // Create a cipher using the key
-  const cipher = crypto.createCipher('aes-256-cbc', cryptographicKey);
-  // Encode the data using base64 encoding
-  let encodedData = cipher.update(data, 'utf-8', 'base64');
-  encodedData += cipher.final('base64');
-  return encodedData;
+  const iv = crypto.randomBytes(ivLength); // Initialization vector
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+
+  let encrypted = cipher.update(data, 'utf8', 'base64');
+  encrypted += cipher.final('base64');
+
+  return iv.toString('base64') + ':' + encrypted;
 };
 
 const decodeBase64WithKey = (encodedData) => {
-  // Create a decipher using the key
   try {
+    const [ivBase64, encryptedData] = encodedData.split(':');
+    const iv = Buffer.from(ivBase64, 'base64');
 
-    const decipher = crypto.createDecipher('aes-256-cbc', cryptographicKey);
-    // Decode the base64 encoded data
-    let decodedData = decipher.update(encodedData, 'base64', 'utf-8');
-    decodedData += decipher.final('utf-8');
-    return decodedData;
-  }
-  catch (error) {
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (err) {
+    console.error("Decryption failed:", err.message);
     return false;
   }
 };
-
 
 //AUTHENTICATION
 
@@ -101,7 +104,7 @@ async function serverUserType(req, res, next, ...authType) {
     let userType = "students";
 
     console.log(req.route)
-    if (req.route.path != "/login" ) {
+    if (req.route.path != "/login") {
       if (!req.headers['x-api-key']) {
         return res.status(401).json({ message: 'Unauthorized: Missing xapi' });
       }
@@ -511,24 +514,24 @@ async function countDocuments(collectionName) {
     throw error;
   }
 }
-const getStatCounts=async ()=>{
-  let data={
-    moderators:0,
-    administrators:0,
-    students:0,
+const getStatCounts = async () => {
+  let data = {
+    moderators: 0,
+    administrators: 0,
+    students: 0,
   }
   await countDocuments('Sinhgad/users/students')
-    .then(count => data.students=count)
+    .then(count => data.students = count)
     .catch(error => console.error('Error:', error));
   await countDocuments('Sinhgad/users/moderators')
-    .then(count => data.moderators=count)
+    .then(count => data.moderators = count)
     .catch(error => console.error('Error:', error));
- await  countDocuments('Sinhgad/users/administrators')
-    .then(count => data.administrators=count)
+  await countDocuments('Sinhgad/users/administrators')
+    .then(count => data.administrators = count)
     .catch(error => console.error('Error:', error));
-    return data
+  return data
 
-  
+
 }
 
 
@@ -548,7 +551,7 @@ const getGrantProfile = async (department, year) => {
 
       const subjectInfo = {
         subjectMiniProjects: data.subjectMiniProjects > 0 ? Array(data.subjectMiniProjects).fill(0) : null,
-        subjectIsElective: data.subjectIsElective ? { selectedSubject: "", subjectElectiveChoices: data.subjectElectiveChoices,selectionAvailable:false,selectionDue:null } : null,
+        subjectIsElective: data.subjectIsElective ? { selectedSubject: "", subjectElectiveChoices: data.subjectElectiveChoices, selectionAvailable: false, selectionDue: null } : null,
         assignmentsArray: assignmentsArray,
         utData: {
           utMarks: 0,
@@ -634,8 +637,8 @@ const addUserDataToFirestore = async (userData) => {
           console.warn('Skipping incomplete teacher data:', user);
           return; // Skip this teacher
         }
-        
-        else{
+
+        else {
           console.log({
             id: user.uid,
             name: user.name,
@@ -658,12 +661,12 @@ const addUserDataToFirestore = async (userData) => {
             designation: user.designation,
             department: user.department,
           });
-  
+
           console.log(`Document created for user: ${user.uid}`);
         }
 
         // Create a new document for each user
-        
+
       }));
 
       console.log('User data added to Firestore successfully');
@@ -982,7 +985,7 @@ console.log("")
 
 const addOrUpdateSubjects = async (subjectData) => {
   try {
-    
+
     await Promise.all(subjectData.map(async (subject) => {
 
       const querySnapshot = await firebase.firestore().collection(`Sinhgad/attendance/${subject.subjectYear}/${subject.subjectDepartment}/subjects/`)
@@ -3265,10 +3268,10 @@ async function deleteSheet(sheetId) {
 //   });
 
 
-async function firebaseElectiveActivate(semester,subject) { }
-async function firebaseElectiveDeactivate(semester,subject) { }
-async function firebaseElectiveAllocate(semester,subject,uidlist) { }
-async function firebaseElectiveDislocate(semester,subject,uidlist) { }
+async function firebaseElectiveActivate(semester, subject) { }
+async function firebaseElectiveDeactivate(semester, subject) { }
+async function firebaseElectiveAllocate(semester, subject, uidlist) { }
+async function firebaseElectiveDislocate(semester, subject, uidlist) { }
 module.exports = {
   getStudentAttendanceStats,
   fetchPosts, addPost, firebaseVerifyPost, fetchPostsByOwnerId,
@@ -3287,5 +3290,5 @@ module.exports = {
   firebaseElectiveActivate,
   firebaseElectiveDeactivate,
   firebaseElectiveAllocate,
-  firebaseElectiveDislocate,getStatCounts
+  firebaseElectiveDislocate, getStatCounts
 };
