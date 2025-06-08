@@ -743,7 +743,8 @@ export default function Overview() {
                 isDisabled={
                   !allocationData.subject ||
                   !allocationData.division ||
-                  !allocationData.semester
+                  !allocationData.semester ||
+                  !allocationData.subjectYear
                 }
               >
                 Allocate Subject

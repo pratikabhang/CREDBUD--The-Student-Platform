@@ -30,34 +30,29 @@ firebase.firestore().settings({ ignoreUndefinedProperties: true });
 
 
 const encodeBase64WithKey = (data) => {
-  try {
-    const iv = crypto.randomBytes(16); // Generate a random initialization vector
-    const cipher = crypto.createCipheriv('aes-256-cbc',
-      Buffer.from(cryptographicKey), iv);
-    let encrypted = cipher.update(data, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
-    return iv.toString('base64') + ':' + encrypted;
-  } catch (error) {
-    console.error('Error encoding data:', error);
-    return null;
-  }
+  // Create a cipher using the key
+  const cipher = crypto.createCipher('aes-256-cbc', cryptographicKey);
+  // Encode the data using base64 encoding
+  let encodedData = cipher.update(data, 'utf-8', 'base64');
+  encodedData += cipher.final('base64');
+  return encodedData;
 };
 
 const decodeBase64WithKey = (encodedData) => {
+  // Create a decipher using the key
   try {
-    const textParts = encodedData.split(':');
-    const iv = Buffer.from(textParts[0], 'base64');
-    const encryptedText = textParts[1];
-    const decipher = crypto.createDecipheriv('aes-256-cbc',
-      Buffer.from(cryptographicKey), iv);
-    let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
-  } catch (error) {
-    console.error('Error decoding data:', error);
+
+    const decipher = crypto.createDecipher('aes-256-cbc', cryptographicKey);
+    // Decode the base64 encoded data
+    let decodedData = decipher.update(encodedData, 'base64', 'utf-8');
+    decodedData += decipher.final('utf-8');
+    return decodedData;
+  }
+  catch (error) {
     return false;
   }
 };
+
 
 //AUTHENTICATION
 
@@ -106,7 +101,7 @@ async function serverUserType(req, res, next, ...authType) {
     let userType = "students";
 
     console.log(req.route)
-    if (req.route.path != "/login") {
+    if (req.route.path != "/login" ) {
       if (!req.headers['x-api-key']) {
         return res.status(401).json({ message: 'Unauthorized: Missing xapi' });
       }
@@ -516,24 +511,24 @@ async function countDocuments(collectionName) {
     throw error;
   }
 }
-const getStatCounts = async () => {
-  let data = {
-    moderators: 0,
-    administrators: 0,
-    students: 0,
+const getStatCounts=async ()=>{
+  let data={
+    moderators:0,
+    administrators:0,
+    students:0,
   }
   await countDocuments('Sinhgad/users/students')
-    .then(count => data.students = count)
+    .then(count => data.students=count)
     .catch(error => console.error('Error:', error));
   await countDocuments('Sinhgad/users/moderators')
-    .then(count => data.moderators = count)
+    .then(count => data.moderators=count)
     .catch(error => console.error('Error:', error));
-  await countDocuments('Sinhgad/users/administrators')
-    .then(count => data.administrators = count)
+ await  countDocuments('Sinhgad/users/administrators')
+    .then(count => data.administrators=count)
     .catch(error => console.error('Error:', error));
-  return data
+    return data
 
-
+  
 }
 
 
@@ -553,7 +548,7 @@ const getGrantProfile = async (department, year) => {
 
       const subjectInfo = {
         subjectMiniProjects: data.subjectMiniProjects > 0 ? Array(data.subjectMiniProjects).fill(0) : null,
-        subjectIsElective: data.subjectIsElective ? { selectedSubject: "", subjectElectiveChoices: data.subjectElectiveChoices, selectionAvailable: false, selectionDue: null } : null,
+        subjectIsElective: data.subjectIsElective ? { selectedSubject: "", subjectElectiveChoices: data.subjectElectiveChoices,selectionAvailable:false,selectionDue:null } : null,
         assignmentsArray: assignmentsArray,
         utData: {
           utMarks: 0,
@@ -639,8 +634,8 @@ const addUserDataToFirestore = async (userData) => {
           console.warn('Skipping incomplete teacher data:', user);
           return; // Skip this teacher
         }
-
-        else {
+        
+        else{
           console.log({
             id: user.uid,
             name: user.name,
@@ -663,12 +658,12 @@ const addUserDataToFirestore = async (userData) => {
             designation: user.designation,
             department: user.department,
           });
-
+  
           console.log(`Document created for user: ${user.uid}`);
         }
 
         // Create a new document for each user
-
+        
       }));
 
       console.log('User data added to Firestore successfully');
@@ -987,7 +982,7 @@ console.log("")
 
 const addOrUpdateSubjects = async (subjectData) => {
   try {
-
+    
     await Promise.all(subjectData.map(async (subject) => {
 
       const querySnapshot = await firebase.firestore().collection(`Sinhgad/attendance/${subject.subjectYear}/${subject.subjectDepartment}/subjects/`)
@@ -3270,10 +3265,10 @@ async function deleteSheet(sheetId) {
 //   });
 
 
-async function firebaseElectiveActivate(semester, subject) { }
-async function firebaseElectiveDeactivate(semester, subject) { }
-async function firebaseElectiveAllocate(semester, subject, uidlist) { }
-async function firebaseElectiveDislocate(semester, subject, uidlist) { }
+async function firebaseElectiveActivate(semester,subject) { }
+async function firebaseElectiveDeactivate(semester,subject) { }
+async function firebaseElectiveAllocate(semester,subject,uidlist) { }
+async function firebaseElectiveDislocate(semester,subject,uidlist) { }
 module.exports = {
   getStudentAttendanceStats,
   fetchPosts, addPost, firebaseVerifyPost, fetchPostsByOwnerId,
@@ -3292,5 +3287,5 @@ module.exports = {
   firebaseElectiveActivate,
   firebaseElectiveDeactivate,
   firebaseElectiveAllocate,
-  firebaseElectiveDislocate, getStatCounts
+  firebaseElectiveDislocate,getStatCounts
 };

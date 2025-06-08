@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { firebaseTokenLogin } = require('../utils/firebase');
 const login = async (req, res) => {
@@ -12,7 +12,7 @@ const login = async (req, res) => {
         else {
             res.status(200).json({ user, customToken });
         }
-        // const passwordsMatch = await bcrypt.compare(password, user.password);
+        // const passwordsMatch = await bcryptjs.compare(password, user.password);
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while logging in' + error });
     }

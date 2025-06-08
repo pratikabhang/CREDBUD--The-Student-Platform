@@ -319,13 +319,6 @@ export default function Marketplace() {
           justifyContent="right"
           colorScheme="brand.500"
         >
-          <Button
-            onClick={() => handleModal("VIP")}
-            colorScheme="blue"
-            variant="solid"
-          >
-            Quick Mark Attendance
-          </Button>
           <TabList>
             <Tab></Tab>
           </TabList>
@@ -349,7 +342,7 @@ export default function Marketplace() {
                 <button onClick={() => handleModal("QR")}>
                   <Banner
                     icon={<MdOutbond size="87px" />}
-                    name="Export Attendance to Sheets"
+                    name="Export Attendance"
                   />
                 </button>
               </Grid>
