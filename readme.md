@@ -12,8 +12,6 @@
 | **Alternative Frontend** | [credbudstudent.netlify.app](https://credbudstudent.netlify.app) |
 | **Backend API** | [credbudbackend.onrender.com](https://credbudbackend.onrender.com/) |
 
-**[📂 GitHub Repository](https://github.com/pratikabhang/CREDBUD--The-Student-Platform)**
-
 ---
 
 ## 📚 Research & Publications  
